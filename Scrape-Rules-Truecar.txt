@@ -1,0 +1,8 @@
+This document contains web scraping rules specifically for "truecar.com".
+
+1. Goto the website with pattern 'truecar.com/prices-new/<brand>/<model>-config/'.
+In this link, there is a list of trims (a.k.a styles) under that model car. There are five tabs for configuration of a vehicle.
+One of them is "Styles". When a tab is selected, one of its attributes is set to true indicating that the tab is active. Status
+of a tab can be fetched as follows:
+	- Tag: <div> & Attributes:  class = "tab-bar tab-bar-block tab-bar-scrollable"
+	- 

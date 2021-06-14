@@ -1,0 +1,51 @@
+This file describes the structure of the cars data to be stored in DB.
+
+Static data:
+- Car makers
+- Models for each car maker
+
+Dynamic data:
+- Car trims (might change very rarely)
+- Prices
+- Features
+- Year
+- Pictures
+
+Static data needs to be fetched only once and then be saved in a database. In case of
+loss of this data, it can be re-fetched. Rest of the data is either fetched or updated
+based on the static data. In case of a total loss of data, the system should be able to
+get static data from a reliable source and then use that to fetch rest of the data. Hence
+the entire application, which relies only on the static data, is loosely coupled to
+external data sources.
+
+Data source from which static data is fetched must be reliable and not change the webpages
+frequently.
+Static data source: #Todo
+
+At this point, only new cars data is fetched for that calendar year in which the application runs.
+Data source(s) for dynamic data as follows.
+- truecar.com
+
+----------------------------- Dynamic data details -----------------------------
+In the future, the data would be stored in an unstructured format. At this point, it is fetched and
+stored in a structured format ONLY. Therefore, a rigid structure that every car details must
+adhere to, is as follows:
+
+Required fields for every car:
+- Year
+- Price
+- Trim
+- Mileage
+- Type (SUV, Sedan, ...)
+- Transmission
+
+Optional fields:
+- Horsepower
+- Torque
+- Dimensions (Length, Width, Height)
+- Interior volumes (Legrooms, Trunk volume)
+- Seating capacity
+- Engine capacity
+- Fuel tank capacity
+- Fuel type
+

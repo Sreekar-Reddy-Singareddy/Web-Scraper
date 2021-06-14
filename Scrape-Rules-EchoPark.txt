@@ -1,0 +1,52 @@
+Description: In this website, we scrape the details of all the used cars available in EchoPark's inventory. Scraping is done 
+based on Make & Model of a car.
+
+Required Fields:
+- VIN
+- Year, Trim (in same text)
+- Stock ID
+- KBB Price
+- EchoPark Price
+- Location
+- Mileage
+- Fuel Economy
+- Colors (exterior & interior)
+- Transmission
+- Engine
+
+Optional Fields:
+- Other detailed specs below
+
+Rules:
+>>>VIN, Stock ID, Year, Trim<<<
+- Get div[@id="vehicle-title1-app-root"]. There should only be one element with that path in the entire page.
+- Under that there is a simple div element.
+- Under that there are two elements - h1 & ul.
+	- VIN is in one of the ul children. Get ul[@class="additional-details list-inline mb-0 font-weight-normal ddc-font-size-small text-muted mt-3"].
+	- Pass this element over to JS executor and run a script to get $VIN text and $Stock_ID text.
+	- Car name details are in the h1 element. Get h1[@class="vehicle-title m-0 line-height-reset"].
+	- Pass this element over to JS executor and get $Year & $Trim text.
+
+>>>Location<<<
+- Get div[@class="d-sm-inline mr-5"]/strong element. The $Location can be directly fetched from this element text.
+
+>>>Mileage, Economy, Colors, Engine, Transmission<<<
+- Get div[@id="quick-specs1-app-root"]/dl[@class="line-height-condensed dl-horizontal row list-spaced"] element.
+This contains $Mileage, $Economy, $Exterior_Color, $Interior_Color, $Engine, and $Transmission data.
+- Pass this element to JS. Inside the element, there are two types of tag elements - dd for values & dt for keys.
+- Each dd or dt element might contain an optional children tagged 'span'. Text content can be fetched based on either directly from dd and dt tags or from
+this optional child.
+- There is a one-to-one correspondence between all the dt and dd tags.
+
+>>>KBB Price, EchoPark Price<<<
+- Get div[@id="detailed-pricing1-app-root"]/dl[@class="pricing-detail line-height-condensed mb-4 inv-type-used"]/dd[@class="salePrice"]/span element.
+- This is the KBB price number.
+- Get div[@id="detailed-pricing1-app-root"]/dl[@class="pricing-detail line-height-condensed mb-4 inv-type-used"]/dd[@class="final-price internetPrice font-weight-bold BLANK ddc-font-size-large line-height-reset pb-2 text-muted"]/span element.
+- This is the EchoPark selling price.
+- Note that the KBB price is optional. Hence its precense must be checked before fetching it.
+
+>>>Optional Specs<<<
+- Get all elements with XPATH //li[@class='spec-item'].
+- Each of these elements is a specifical detail about the car. 
+- Each element might take KEY:VALUE form or VALUE form. Get these details using JS script.
+
