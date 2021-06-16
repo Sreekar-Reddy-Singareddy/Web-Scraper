@@ -7,7 +7,25 @@ from selenium import *
 from selenium.webdriver.support import expected_conditions as EC
 
 def parse ():
-    return {"Brand": "Honda", "Model": "Accord"}
+    driver = webdriver.Chrome(executable_path='/Users/sreekar/Downloads/chromedriver')
+    urls = ["https://www.echopark.com/used/Honda/2019-Honda-Civic-b3e89b230a0e0ae86ba3e77bd4884a88.htm",
+            "https://www.echopark.com/used/Honda/2018-Honda-Accord-283ecd300a0e0a173e8f42ae7f8a180b.htm"]
+
+    result = []
+    for url in urls:
+        specs_dict = {}
+        driver.get(url)
+
+        get_car_identification(driver, specs_dict)
+        get_car_basic_details(driver, specs_dict)
+        get_car_pricing(driver, specs_dict)
+        get_car_location(driver, specs_dict)
+        get_car_other_specs(driver, specs_dict)
+        print(specs_dict)
+        result.append(specs_dict)
+
+    driver.quit()
+    return result
 
 
 def get_car_identification(driver, json):
@@ -99,8 +117,6 @@ def get_car_other_specs(driver, json):
 
 if __name__ == "__main__":
     driver = webdriver.Chrome(executable_path='/Users/sreekar/Downloads/chromedriver')
-    print("First URL loading...")
-
     urls = ["https://www.echopark.com/used/Honda/2019-Honda-Civic-b3e89b230a0e0ae86ba3e77bd4884a88.htm",
             "https://www.echopark.com/used/Honda/2018-Honda-Accord-283ecd300a0e0a173e8f42ae7f8a180b.htm"]
 
@@ -118,6 +134,3 @@ if __name__ == "__main__":
         result.append(specs_dict)
 
     driver.quit()
-    f = open("/Users/sreekar/Desktop/scrape.json", "a")
-    f.write(str(result))
-    f.close()
