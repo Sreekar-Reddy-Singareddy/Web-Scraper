@@ -5,14 +5,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium import *
 from selenium.webdriver.support import expected_conditions as EC
+import json
 
-def parse ():
-    driver = webdriver.Chrome(executable_path='/Users/sreekar/Downloads/chromedriver')
-    urls = ["https://www.echopark.com/used/Honda/2019-Honda-Civic-b3e89b230a0e0ae86ba3e77bd4884a88.htm",
-            "https://www.echopark.com/used/Honda/2018-Honda-Accord-283ecd300a0e0a173e8f42ae7f8a180b.htm"]
-
-    result = []
-    for url in urls:
+def scrape (url):
+    try:
+        driver = webdriver.Chrome(executable_path='/Users/sreekar/Downloads/chromedriver')
         specs_dict = {}
         driver.get(url)
 
@@ -22,10 +19,14 @@ def parse ():
         get_car_location(driver, specs_dict)
         get_car_other_specs(driver, specs_dict)
         print(specs_dict)
-        result.append(specs_dict)
 
-    driver.quit()
-    return result
+        driver.quit()
+        json_obj = json.dumps(specs_dict)
+
+        return json_obj
+    except:
+        return "SCRAPE ERROR"
+
 
 
 def get_car_identification(driver, json):
@@ -63,6 +64,34 @@ def get_car_basic_details(driver, json):
     trim = arr[1].strip().split(" ")[1] # Todo: Need to change the logic to get complete trim.
     json["year"] = year
     json["trim"] = trim
+
+    car_element_xpath = "//div[@id='quick-specs1-app-root']/" \
+                        "dl[@class='line-height-condensed dl-horizontal row list-spaced']"
+    car_info_element = driver.find_element(By.XPATH, car_element_xpath)
+    js_result = driver.execute_script (
+        'keyArr = arguments[0].getElementsByTagName("dt");'
+        'valArr = arguments[0].getElementsByTagName("dd");'
+        'len = keyArr.length;'
+        'result = {};'
+        'for (let i=0; i<len; i++) {'
+        '  key = keyArr[i];'
+        '  val = valArr[i];'
+        '  keyText = "";'
+        '  valText = "";'
+        '  arr1 = key.getElementsByTagName("span");'
+        '  arr2 = val.getElementsByTagName("span");'
+        '  if (arr1.length == 0) keyText = key.textContent;'
+        '  else keyText = arr1[arr1.length-1].textContent;'
+        '  if (arr2.length == 0) valText = val.textContent;'
+        '  else valText = arr2[arr2.length-1].textContent;'
+        '  console.log(keyText);'
+        '  result[keyText] = valText;'
+        '}'
+        'return result;', car_info_element)
+    res_dict = dict(js_result)
+    for (key,value) in res_dict.items():
+        key = key.split("/")[0].strip().lower().replace(" ", "_")
+        json[key] = value
 
 
 def get_car_pricing(driver, json):
@@ -110,15 +139,17 @@ def get_car_other_specs(driver, json):
         arr = list(js_result)
         key = arr[0].split(":")[0].strip()
         value = arr[1].strip()
-        final_spec = key + " : " + value
-        all_specs.append(final_spec)
+        if key != "":
+            new_key = key.lower().replace(" ", "_")
+            json[new_key] = value
+        all_specs.append(key+" : "+value)
+
     json["detailed_specs"] = all_specs
 
 
 if __name__ == "__main__":
     driver = webdriver.Chrome(executable_path='/Users/sreekar/Downloads/chromedriver')
-    urls = ["https://www.echopark.com/used/Honda/2019-Honda-Civic-b3e89b230a0e0ae86ba3e77bd4884a88.htm",
-            "https://www.echopark.com/used/Honda/2018-Honda-Accord-283ecd300a0e0a173e8f42ae7f8a180b.htm"]
+    urls = ["https://www.echopark.com/used/Toyota/2019-Toyota-Camry-d89774390a0e09a957961eee86975b44.htm"]
 
     result = []
     for url in urls:
@@ -130,7 +161,13 @@ if __name__ == "__main__":
         get_car_pricing(driver, specs_dict)
         get_car_location(driver, specs_dict)
         get_car_other_specs(driver, specs_dict)
-        print(specs_dict)
+        # print(specs_dict)
         result.append(specs_dict)
 
     driver.quit()
+
+    file = open("/Users/sreekar/Desktop/scrape.json", "w")
+    json.dump(result, file)
+    file.close()
+
+    # json_obj = json.dumps(result)
