@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -67,4 +68,15 @@ public class EchoParkService {
         }
     }
 
+    public List<String> convertToList(String jsonString) {
+        JsonNode jsonNode = getJsonNode(jsonString);
+        if (jsonNode == null) return new ArrayList<String>();
+
+        Iterator<JsonNode> iterator = jsonNode.elements();
+        List<String> allUrls = new ArrayList<>();
+        while (iterator.hasNext()) {
+            allUrls.add(iterator.next().textValue());
+        }
+        return allUrls;
+    }
 }

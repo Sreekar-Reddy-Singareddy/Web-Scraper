@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.List;
 
 @Service
 public class Client {
@@ -18,8 +19,8 @@ public class Client {
         restTemplate = builder.build();
     }
 
-    public String scrape () {
-        String url = "http://127.0.0.1:8000/scrape";
+    public String scrapeCarInfo() {
+        String url = "http://127.0.0.1:8000/scrape/car";
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("echopark-url", "https://www.echopark.com/used/Toyota/2019-Toyota-Camry-d89774390a0e09a957961eee86975b44.htm");
@@ -31,6 +32,16 @@ public class Client {
         echoParkService.validateJSON(body);
 
         return body;
+    }
+
+    public String scrapeInventoryUrls() {
+        String url = "http://127.0.0.1:8000/scrape/inventory";
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+        String body = responseEntity.getBody();
+
+        List<String> allUrls = echoParkService.convertToList(body);
+
+        return String.format("Fetched %d URLs.\n",allUrls.size());
     }
 
     public String demo () {

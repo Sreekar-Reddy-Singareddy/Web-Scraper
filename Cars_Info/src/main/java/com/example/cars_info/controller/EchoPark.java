@@ -23,10 +23,15 @@ public class EchoPark {
     @Autowired private StockLinkRepository stockLinkRepository;
     @Autowired private Client client;
 
-    @GetMapping(path = "/scrape")
-    public @ResponseBody String callScraper() {
-        System.out.println("Inside callscraper");
-        String response = client.scrape();
+    @GetMapping(path = "/scrape/car")
+    public @ResponseBody String callCarInfoScraper() {
+        String response = client.scrapeCarInfo();
+        return response;
+    }
+
+    @GetMapping(path = "/scrape/inventory")
+    public @ResponseBody String callInventoryUrlsScraper() {
+        String response = client.scrapeInventoryUrls();
         return response;
     }
 
