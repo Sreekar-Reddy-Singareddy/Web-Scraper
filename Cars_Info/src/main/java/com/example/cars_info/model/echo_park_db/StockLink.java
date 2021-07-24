@@ -7,9 +7,9 @@ import java.util.Date;
 @Table (name = "INVENTORY_LINKS")
 public class StockLink {
     @Id
-    @GeneratedValue (strategy = GenerationType.AUTO)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private int id;
-    @Column (name = "stock_link")
+    @Column (name = "link")
     private String stockLink;
     @Column (name = "last_successful_export")
     private Date lastSuccessExport;
@@ -46,5 +46,15 @@ public class StockLink {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    @Override
+    public String toString() {
+        return "StockLink{" +
+                "id=" + id +
+                ", stockLink='" + stockLink + '\'' +
+                ", lastSuccessExport=" + lastSuccessExport +
+                ", isActive=" + isActive +
+                '}';
     }
 }

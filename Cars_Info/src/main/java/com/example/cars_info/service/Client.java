@@ -1,5 +1,7 @@
 package com.example.cars_info.service;
 
+import com.example.cars_info.model.echo_park_db.CarDetails;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
@@ -23,13 +25,21 @@ public class Client {
         String url = "http://127.0.0.1:8000/scrape/car";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("echopark-url", "https://www.echopark.com/used/Toyota/2019-Toyota-Camry-d89774390a0e09a957961eee86975b44.htm");
+        headers.add("echopark-url", "https://www.echopark.com/used/Volkswagen/2019-Volkswagen-Jetta-5f5221f10a0e09a934a7a3c791a08d42.htm");
+        headers.add("make", "Volkswagen");
+        headers.add("model", "Jetta");
 
         HttpEntity<String> httpEntity = new HttpEntity<>("",headers);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url,HttpMethod.GET,httpEntity,String.class);
         String body = responseEntity.getBody();
 
-        echoParkService.validateJSON(body);
+        JsonNode jsonNode = echoParkService.validateJSON(body);
+        System.out.println(jsonNode);
+        if (jsonNode != null) {
+            CarDetails carDetails = new CarDetails();
+            echoParkService.mapJsonToCarObj(jsonNode, carDetails);
+            echoParkService.saveCarDetailsInDatabase(carDetails);
+        }
 
         return body;
     }
@@ -40,8 +50,9 @@ public class Client {
         String body = responseEntity.getBody();
 
         List<String> allUrls = echoParkService.convertToList(body);
+        int urlSaved = echoParkService.saveUrlsInDatabase(allUrls);
 
-        return String.format("Fetched %d URLs.\n",allUrls.size());
+        return String.format("[%d] URLs are saved out of [%d]. Rest already exist.\n",urlSaved , allUrls.size());
     }
 
     public String demo () {

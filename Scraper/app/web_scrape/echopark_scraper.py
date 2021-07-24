@@ -8,14 +8,14 @@ from selenium.webdriver.support import expected_conditions as EC
 import json
 import math
 
-def scrape_car_details (url):
+def scrape_car_details (url, make, model):
     try:
         driver = webdriver.Chrome(executable_path='/Users/sreekar/Downloads/chromedriver')
         driver.get(url)
         specs_dict = {}
 
         get_car_identification(driver, specs_dict)
-        get_car_basic_details(driver, specs_dict)
+        get_car_basic_details(driver, specs_dict, make, model)
         get_car_pricing(driver, specs_dict)
         get_car_location(driver, specs_dict)
         get_car_other_specs(driver, specs_dict)
@@ -45,7 +45,7 @@ def get_car_identification(driver, json):
     json["vin"] = arr[0].split(":")[1].strip()
     json["stock_id"] = arr[1].split(":")[1].strip()
 
-def get_car_basic_details(driver, json):
+def get_car_basic_details(driver, json, make, model):
     car_element_xpath = "//div[@id='vehicle-title1-app-root']/" \
                            "div/" \
                            "h1[@class='vehicle-title m-0 line-height-reset']"
@@ -58,8 +58,11 @@ def get_car_basic_details(driver, json):
         'trim_text = arr[1].textContent;'
         'return [year_text, trim_text];', car_element)
     arr = list(js_result)
-    year = arr[0].strip().split(" ")[1]
-    trim = arr[1].strip().split(" ")[1] # Todo: Need to change the logic to get complete trim.
+    line_1_arr = arr[0].strip().split(" ")
+    year = line_1_arr[1]
+    trim = arr[1].replace(model, "").strip()
+    json["make"] = make
+    json["model"] = model
     json["year"] = year
     json["trim"] = trim
 
@@ -139,14 +142,14 @@ def get_car_other_specs(driver, json):
             json[new_key] = value
         all_specs.append(key+" : "+value)
 
-    json["detailed_specs"] = all_specs
-
+    json["detailed_specs"] = str(all_specs)
 
 def scrape_all_car_urls (inventory_url):
     try:
         driver = webdriver.Chrome(executable_path='/Users/sreekar/Downloads/chromedriver')
         driver.get(inventory_url)
         inventory_size = get_number_of_cars_in_inventory(driver)
+        print(inventory_size)
 
         all_inventory_urls = []
         num_pages = math.ceil(inventory_size/24)
@@ -160,18 +163,24 @@ def scrape_all_car_urls (inventory_url):
         print(error)
         return "EXCEPTION OCCURED IN INVENTORY SCRAPER"
 
-
 def get_urls_current_page(driver, inventory_url, page):
-    inventory_url = inventory_url + "?start=" + str(page*24)
-    driver.get(inventory_url)
-    driver.implicitly_wait(3)
-
-    xpath = "//h2[@class='vehicle-card-title mt-0 d-flex justify-content-between align-items-end h3 inv-type-pre-owned']/" \
-            "a"
-    url_elements = driver.find_elements(By.XPATH, xpath)
     urls = []
+
+    inventory_url = inventory_url + "?start=" + str(page*24)
+    print(inventory_url)
+    # WebDriverWait(driver, 10).until(lambda d: d.execute_script('return document.readyState') == 'complete')
+    driver.implicitly_wait(3)
+    driver.get(inventory_url)
+
+    xpath = "//*[@id='inventory-results1-app-root']/div/ul/li"
+
+    url_elements = driver.find_elements(By.XPATH, xpath)
     for url_element in url_elements:
-        urls.append(url_element.get_attribute("href"))
+        print(url_element.get_attribute("data-uuid"))
+        url_element.location_once_scrolled_into_view
+        ref = url_element.find_element(By.XPATH, ".//div/div/h2/a")
+        urls.append(ref.get_attribute("href"))
+        print(ref.get_attribute("href"))
 
     return urls
 

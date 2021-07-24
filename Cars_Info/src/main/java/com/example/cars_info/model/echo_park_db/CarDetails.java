@@ -7,7 +7,7 @@ import javax.persistence.*;
 public class CarDetails {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.AUTO)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private int id;
     private String vin;
     private String make;
